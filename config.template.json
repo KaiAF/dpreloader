@@ -1,0 +1,16 @@
+{
+  "datapackRepo": "ENTER_REPO_HERE",
+  "PORT": 8080,
+  "ratelimit": {
+    "limit": 5,
+    "maxTime": 300000
+  },
+  "multiplexer": {
+    "type": "ENTER_TYPE_HERE",
+    "paneName": "ENTER_NAME_HERE"
+  },
+  "server": {
+    "isBukkit": false,
+    "worldPath": "ENTER_PATH_HERE"
+  }
+}
