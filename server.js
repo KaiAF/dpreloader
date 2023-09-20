@@ -28,7 +28,12 @@ app.use(MaxRequests);
 
 app.get('/upload', async function (req, res) {
   try {
-    fs.rmSync(config.server.worldPath, { recursive: true });
+    if (!fs.existsSync(config.server.worldPath)) {
+      fs.mkdirSync(config.server.worldPath, { recursive: true });
+      console.warn('Created directory since it was not found: ' + config.server.worldPath);
+    } else {
+      fs.rmSync(config.server.worldPath, { recursive: true });
+    }
     execSync(`git clone ${config.datapackRepo} ${config.server.worldPath}`);
     try {
       switch (config.multiplexer.type) {
