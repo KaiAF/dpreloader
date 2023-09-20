@@ -26,7 +26,7 @@ const MaxRequests = rateLimit({
 
 app.use(MaxRequests);
 
-app.get('/upload', async function (req, res) {
+app.post('/upload', async function (req, res) {
   try {
     if (!fs.existsSync(config.server.worldPath)) {
       fs.mkdirSync(config.server.worldPath, { recursive: true });
