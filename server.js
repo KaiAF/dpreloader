@@ -5,17 +5,11 @@ const { rateLimit } = require('express-rate-limit');
 const fs = require('fs');
 const app = express();
 
+app.enable('trust proxy');
+
 const config = JSON.parse(fs.readFileSync('config.json').toString());
 
-let worldPath = null;
-
 (function () {
-  worldPath = config.server.worldPath;
-  if (!worldPath.endsWith('/datapacks') && !worldPath.endsWith('/datapacks/')) {
-    console.warn('Appended \'/datapacks\' to the worldPath');
-    worldPath = worldPath + '/datapacks';
-  }
-
   try {
     new URL(config.datapackRepo);
   } catch (e) {
