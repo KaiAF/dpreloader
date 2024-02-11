@@ -1,5 +1,6 @@
 {
   "datapackRepo": "ENTER_REPO_HERE",
+  "resourcePack": "ENTER_REPO_HERE",
   "PORT": 8080,
   "ratelimit": {
     "limit": 5,
