@@ -4,6 +4,7 @@ const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const os = require('os');
 const fs = require('fs');
+const path = require('path');
 const app = express();
 
 app.enable('trust proxy');
@@ -39,7 +40,7 @@ app.get('/pack.zip', async function (req, res) {
       }
     }
 
-    res.sendFile('./resourcePack/pack.zip');
+    res.sendFile(path.join(__dirname, './resourcePack/pack.zip'));
   } catch (e) {
     console.error(e);
     res.sendStatus(500);
