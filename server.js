@@ -36,7 +36,7 @@ app.get('/pack.zip', async function (req, res) {
       if (os.platform() == 'win32') {
         execSync('cd ./resourcePack && tar.exe -a -c -f pack.zip .');
       } else {
-        execSync('cd ./resourcePack && zip pack.zip *');
+        execSync('cd ./resourcePack && zip -r pack.zip *');
       }
     }
 
