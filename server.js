@@ -8,6 +8,8 @@ const path = require('path');
 const app = express();
 
 app.enable('trust proxy');
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 /**
  * @type {{"datapacks":[{datapackRepo:string,resourceRepo:string,multiplexer:{type:string,paneName:string},server:{isBukkit:boolean,worldPath:string}}],PORT:number,ratelimit:{limit:number,maxTime:number}}}
