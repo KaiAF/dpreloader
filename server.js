@@ -62,9 +62,10 @@ app.get('/pack.zip', async function (req, res) {
 
 app.post('/upload', async function (req, res) {
   try {
+    const body = JSON.parse(req.body.payload);
     for (let i = 0; i < config.datapacks.length; i++) {
       const datapack = config.datapacks[i];
-      if (datapack.datapackRepo.trim() === req.body.payload.repository.url.trim()) {
+      if (datapack.datapackRepo.trim() === body.payload.repository.url.trim()) {
         if (!fs.existsSync(datapack.server.worldPath)) {
           fs.mkdirSync(datapack.server.worldPath, { recursive: true });
           console.warn('Created directory since it was not found: ' + datapack.server.worldPath);
@@ -104,9 +105,10 @@ app.post('/upload', async function (req, res) {
 
 app.post('/upload-resource-pack', async function (req, res) {
   try {
+    const body = JSON.parse(req.body.payload);
     for (let i = 0; i < config.datapacks.length; i++) {
       const datapack = config.datapacks[i];
-      if (datapack.datapackRepo.trim() === req.body.payload.repository.url.trim()) {
+      if (datapack.datapackRepo.trim() === body.payload.repository.url.trim()) {
         if (fs.existsSync('./resourcePack')) fs.rmSync('./resourcePack', { recursive: true });
         execSync(`git clone ${datapack.resourceRepo} ./resourcePack`);
         break;
