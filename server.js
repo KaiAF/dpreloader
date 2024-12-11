@@ -9,14 +9,25 @@ const app = express();
 
 app.enable('trust proxy');
 
+/**
+ * @type {{"datapacks":[{datapackRepo:string,resourceRepo:string,multiplexer:{type:string,paneName:string},server:{isBukkit:boolean,worldPath:string}}],PORT:number,ratelimit:{limit:number,maxTime:number}}}
+ */
 const config = JSON.parse(fs.readFileSync('config.json').toString());
 
 (function () {
-  try {
-    new URL(config.datapackRepo);
-  } catch (e) {
-    console.error(`'${config.datapackRepo}' is an invalid URL. Closing.`);
+  if (!config || !config.datapacks || config.datapacks.length === 0) {
+    console.error('Could not find datapacks in config');
     process.exit(1);
+  }
+
+  for (let i = 0; i < config.datapacks.length; i++) {
+    const datapack = config.datapacks[i];
+    try {
+      new URL(datapack.datapackRepo);
+    } catch (e) {
+      console.error(`'${datapack.datapackRepo}' is an invalid URL. Closing.`);
+      process.exit(1);
+    }
   }
 })();
 
@@ -49,29 +60,39 @@ app.get('/pack.zip', async function (req, res) {
 
 app.post('/upload', async function (req, res) {
   try {
-    if (!fs.existsSync(config.server.worldPath)) {
-      fs.mkdirSync(config.server.worldPath, { recursive: true });
-      console.warn('Created directory since it was not found: ' + config.server.worldPath);
-    } else {
-      fs.rmSync(config.server.worldPath, { recursive: true });
-    }
-    execSync(`git clone ${config.datapackRepo} ${config.server.worldPath}`);
-    try {
-      switch (config.multiplexer.type) {
-        case 'tmux':
-          execSync(`tmux send-keys -t ${config.multiplexer.paneName}:0 "reload${config.server.isBukkit ? ' confirm' : ''}" C-m`);
-          break;
-        case 'screen':
-          execSync(`screen -X -S ${config.multiplexer.paneName} stuff "reload${config.server.isBukkit ? ' confirm' : ''}^M"`);
-          break;
-        default:
-          execSync(`reload${config.server.isBukkit ? ' confirm' : ''}`);
-          break;
+    for (let i = 0; i < config.datapacks.length; i++) {
+      const datapack = config.datapacks[i];
+      if (datapack.datapackRepo.trim() === req.body.payload.repository.url.trim()) {
+        if (!fs.existsSync(datapack.server.worldPath)) {
+          fs.mkdirSync(datapack.server.worldPath, { recursive: true });
+          console.warn('Created directory since it was not found: ' + datapack.server.worldPath);
+        } else {
+          fs.rmSync(datapack.server.worldPath, { recursive: true });
+        }
+
+        execSync(`git clone ${datapack.datapackRepo} ${datapack.server.worldPath}`);
+
+        try {
+          switch (datapack.multiplexer.type) {
+            case 'tmux':
+              execSync(`tmux send-keys -t ${datapack.multiplexer.paneName}:0 "reload${datapack.server.isBukkit ? ' confirm' : ''}" C-m`);
+              break;
+            case 'screen':
+              execSync(`screen -X -S ${datapack.multiplexer.paneName} stuff "reload${datapack.server.isBukkit ? ' confirm' : ''}^M"`);
+              break;
+            default:
+              execSync(`reload${datapack.server.isBukkit ? ' confirm' : ''}`);
+              break;
+          }
+        } catch (e) {
+          console.warn(e);
+          execSync(`reload${datapack.server.isBukkit ? ' confirm' : ''}`);
+        }
+
+        break;
       }
-    } catch (e) {
-      console.warn(e);
-      execSync(`reload${config.server.isBukkit ? ' confirm' : ''}`);
     }
+
     res.json({ OK: true });
   } catch (e) {
     console.error(e);
@@ -81,8 +102,14 @@ app.post('/upload', async function (req, res) {
 
 app.post('/upload-resource-pack', async function (req, res) {
   try {
-    if (fs.existsSync('./resourcePack')) fs.rmSync('./resourcePack', { recursive: true });
-    execSync(`git clone ${config.resourceRepo} ./resourcePack`);
+    for (let i = 0; i < config.datapacks.length; i++) {
+      const datapack = config.datapacks[i];
+      if (datapack.datapackRepo.trim() === req.body.payload.repository.url.trim()) {
+        if (fs.existsSync('./resourcePack')) fs.rmSync('./resourcePack', { recursive: true });
+        execSync(`git clone ${datapack.resourceRepo} ./resourcePack`);
+        break;
+      }
+    }
 
     res.json({ OK: true });
   } catch (e) {
